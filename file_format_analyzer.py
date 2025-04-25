@@ -40,10 +40,8 @@ def process_file(file_path, status_label, progress_bar, canvas):
         if not (sample_value.isdigit() and 12 <= len(sample_value) <= 19):
             pan_column = simpledialog.askstring(
                 "Select Column",
-                f"Default first column doesn't look like a PAN.
-Enter the correct column name to mask:
-
-{list(df.columns)}"
+                "Default first column doesn't look like a PAN.\n"
+                "Enter the correct column name to mask:\n\n" + str(list(df.columns))
             )
             if pan_column not in df.columns:
                 status_label.config(text="")
@@ -89,8 +87,7 @@ def save_file(df, progress_bar, canvas):
 
         progress_bar['value'] = 100
         launch_confetti(canvas)
-        messagebox.showinfo("Success", f"File saved successfully to:
-{save_path}")
+        messagebox.showinfo("Success", f"File saved successfully to:\n{save_path}")
 
 def launch_confetti(canvas):
     for _ in range(100):
@@ -99,7 +96,7 @@ def launch_confetti(canvas):
         size = random.randint(5, 10)
         color = random.choice(["red", "blue", "green", "purple", "orange", "gold"])
         canvas.create_oval(x, y, x+size, y+size, fill=color, outline=color)
-    canvas.after(1500, canvas.delete, "all")  # clear after 1.5s
+    canvas.after(1500, canvas.delete, "all")
 
 def create_app():
     root = tk.Tk()
@@ -128,4 +125,3 @@ def create_app():
 
 if __name__ == "__main__":
     create_app()
-    
