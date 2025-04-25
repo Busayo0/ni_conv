@@ -38,6 +38,7 @@ def process_file(file_path, status_label, progress_bar, canvas):
         sample_value = df[pan_column].iloc[0]
 
         if not (sample_value.isdigit() and 12 <= len(sample_value) <= 19):
+            # FIXED: replaced f-string with string + concatenation
             pan_column = simpledialog.askstring(
                 "Select Column",
                 "Default first column doesn't look like a PAN.\n"
@@ -79,6 +80,7 @@ def save_file(df, progress_bar, canvas):
         title="Save As"
     )
     if save_path:
+        # Add empty first row before exporting
         df_with_blank = pd.concat([pd.DataFrame([[""] * len(df.columns)], columns=df.columns), df], ignore_index=True)
         if save_path.endswith('.csv'):
             df_with_blank.to_csv(save_path, index=False)
@@ -112,14 +114,20 @@ def create_app():
     progress_bar = ttk.Progressbar(root, length=300, mode='determinate')
     progress_bar.pack(pady=5)
 
-    select_button = tk.Button(root, text="Select File", command=lambda: select_file(status_label, progress_bar, canvas), height=2, width=25)
+    canvas = tk.Canvas(root, width=400, height=100, bg="white", highlightthickness=1, highlightbackground="lightgray")
+    canvas.pack(pady=5)
+
+    select_button = tk.Button(
+        root,
+        text="Select File",
+        command=lambda: select_file(status_label, progress_bar, canvas),
+        height=2,
+        width=25
+    )
     select_button.pack(pady=10)
 
     footer_label = tk.Label(root, text="Parse • Mask PAN • Save as CSV/JSON", font=("Arial", 9))
     footer_label.pack(pady=10)
-
-    canvas = tk.Canvas(root, width=400, height=100, bg="white", highlightthickness=1, highlightbackground="lightgray")
-    canvas.pack(pady=5)
 
     root.mainloop()
 
