@@ -38,7 +38,7 @@ def process_file(file_path, status_label, progress_bar, canvas):
         if not (sample_value.isdigit() and 12 <= len(sample_value) <= 19):
             pan_column_name = simpledialog.askstring(
                 "Select Column",
-                "Default first column doesn't look like a PAN.\n"
+                "Default first column doesn't look like a PAN.\\n"
                 "Enter the column index to mask (e.g., 0, 1, 2...):"
             )
             try:
@@ -81,8 +81,12 @@ def save_file(df, progress_bar, canvas):
         title="Save As"
     )
     if save_path:
+        # Insert a blank row first
+        empty_row = pd.DataFrame([[""] * len(df.columns)], columns=df.columns)
+        df_with_blank = pd.concat([empty_row, df], ignore_index=True)
+
         if save_path.endswith('.csv'):
-            df.to_csv(save_path, index=False, header=False)
+            df_with_blank.to_csv(save_path, index=False, header=False)
         elif save_path.endswith('.json'):
             df.to_json(save_path, orient='records', indent=4)
 
