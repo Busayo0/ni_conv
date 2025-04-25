@@ -24,10 +24,10 @@ jobs:
 
     - name: Build the EXE
       run: |
-        pyinstaller file_format_analyzer_with_progress.py --onefile --noconsole --icon=finconv.ico
+        pyinstaller file_format_analyzer.py --onefile --noconsole --icon=finconv.ico --name finconv
 
     - name: Upload EXE Artifact
       uses: actions/upload-artifact@v4
       with:
         name: finconv-analyzer-exe
-        path: dist/file_format_analyzer_with_progress.exe
+        path: dist/finconv.exe
