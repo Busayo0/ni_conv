@@ -13,12 +13,10 @@ def detect_encoding(file_path):
     return result['encoding']
 
 def mask_pan(pan_value):
-    if not isinstance(pan_value, str):
-        pan_value = str(pan_value)
+    pan_value = str(pan_value).strip()
     if len(pan_value) >= 8:
         return pan_value[:4] + '*' * (len(pan_value) - 8) + pan_value[-4:]
-    else:
-        return pan_value
+    return pan_value
 
 def process_file(file_path, status_label, progress_bar, canvas):
     try:
@@ -27,7 +25,7 @@ def process_file(file_path, status_label, progress_bar, canvas):
         time.sleep(0.5)
 
         encoding = detect_encoding(file_path)
-        df = pd.read_csv(file_path, delimiter='|', encoding=encoding, dtype=str)
+        df = pd.read_csv(file_path, delimiter='|', encoding=encoding, dtype=str, header=None)
 
         if df.empty:
             status_label.config(text="")
@@ -35,23 +33,26 @@ def process_file(file_path, status_label, progress_bar, canvas):
             return
 
         pan_column = df.columns[0]
-        sample_value = df[pan_column].iloc[0]
+        sample_value = df.iloc[0, 0]
 
         if not (sample_value.isdigit() and 12 <= len(sample_value) <= 19):
-            # FIXED: replaced f-string with string + concatenation
-            pan_column = simpledialog.askstring(
+            pan_column_name = simpledialog.askstring(
                 "Select Column",
                 "Default first column doesn't look like a PAN.\n"
-                "Enter the correct column name to mask:\n\n" + str(list(df.columns))
+                "Enter the column index to mask (e.g., 0, 1, 2...):"
             )
-            if pan_column not in df.columns:
+            try:
+                pan_column = int(pan_column_name)
+                if pan_column not in df.columns:
+                    raise ValueError()
+            except:
                 status_label.config(text="")
-                messagebox.showerror("Error", "Invalid column name selected.")
+                messagebox.showerror("Error", "Invalid column index.")
                 return
 
         status_label.config(text="Masking PAN data... 🍳 Cooking in progress...")
         progress_bar['value'] = 40
-        df[pan_column] = df[pan_column].apply(mask_pan)
+        df[pan_column] = df[pan_column].astype(str).apply(mask_pan)
 
         status_label.config(text="Almost done... preparing download options.")
         progress_bar['value'] = 70
@@ -80,10 +81,8 @@ def save_file(df, progress_bar, canvas):
         title="Save As"
     )
     if save_path:
-        # Add empty first row before exporting
-        df_with_blank = pd.concat([pd.DataFrame([[""] * len(df.columns)], columns=df.columns), df], ignore_index=True)
         if save_path.endswith('.csv'):
-            df_with_blank.to_csv(save_path, index=False)
+            df.to_csv(save_path, index=False, header=False)
         elif save_path.endswith('.json'):
             df.to_json(save_path, orient='records', indent=4)
 
